@@ -2,6 +2,9 @@ import { TextInput, Text, TouchableOpacity, View } from "react-native";
 import { Formik } from "formik";
 import tw from "twrnc";
 import * as Yup from "yup";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLink } from "expo-router";
+import { useEffect } from "react";
 
 const initialValues = {
   email: "",
@@ -25,13 +28,30 @@ const SignupSchema = Yup.object().shape({
   ),
 });
 
+const handleUsername = (fieldName, setFieldValue) => async (text) => {
+  setFieldValue(fieldName, text);
+  await AsyncStorage.setItem("signup_username", text);
+};
+
+const handleEmail = (fieldName, setFieldValue) => async (text) => {
+  setFieldValue(fieldName, text);
+  await AsyncStorage.setItem("signup_email", text);
+};
+
+const handlePassword = (fieldName, setFieldValue) => async (text) => {
+  setFieldValue(fieldName, text);
+  await AsyncStorage.setItem("signup_password", text);
+};
+
 export default function SignUp() {
+  const link = useLink();
+
   return (
     <Formik
       validateOnChange={false}
       initialValues={initialValues}
       validationSchema={SignupSchema}
-      onSubmit={(values) => console.log(values)}
+      onSubmit={() => link.push("onboarding/signupaddr")}
     >
       {({
         handleChange,
@@ -40,6 +60,7 @@ export default function SignUp() {
         values,
         touched,
         errors,
+        setFieldValue,
       }) => (
         <View style={tw`flex-1 justify-between p-15`}>
           <Text style={tw`text-xl text-center font-bold`}>
@@ -52,7 +73,7 @@ export default function SignUp() {
                 style={tw`bg-gray-300 rounded-xl p-3 font-bold my-1`}
                 placeholder="Username"
                 placeholderTextColor="gray"
-                onChangeText={handleChange("username")}
+                onChangeText={handleUsername("username", setFieldValue)}
                 onBlur={handleBlur("username")}
                 value={values.username}
               />
@@ -67,7 +88,7 @@ export default function SignUp() {
                 style={tw`bg-gray-300 rounded-xl p-3 font-bold my-1`}
                 placeholder="Email"
                 placeholderTextColor="gray"
-                onChangeText={handleChange("email")}
+                onChangeText={handleEmail("email", setFieldValue)}
                 onBlur={handleBlur("email")}
                 value={values.email}
               />
@@ -82,7 +103,7 @@ export default function SignUp() {
                 style={tw`bg-gray-300 rounded-xl p-3 font-bold my-1`}
                 placeholder="Password"
                 placeholderTextColor="gray"
-                onChangeText={handleChange("password")}
+                onChangeText={handlePassword("password", setFieldValue)}
                 onBlur={handleBlur("password")}
                 value={values.password}
               />
